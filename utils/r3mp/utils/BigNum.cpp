@@ -5,10 +5,17 @@
 
 #include "BigNum.h"
 
+#include <openssl/bn.h>
+
 namespace r3mp {
 
 class BigNumContext::Impl {
  public:
+  BN_CTX *big_num_context;
+
+  ~Impl() {
+    BN_CTX_free(big_num_context);
+  }
 };
 
 } // namespace r3mp
