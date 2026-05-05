@@ -75,3 +75,37 @@ func (b *cirbuf) Read(p []byte) (n int, err error) {
 
 	return int(toRead), nil
 }
+
+// Reset clears the buffer, making it empty.
+func (b *cirbuf) Reset() {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	b.readPtr = 0
+	b.writePtr = 0
+	b.size = 0
+}
+
+// Close prepares the buffer for deletion.
+func (b *cirbuf) Close() {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	b.data = nil
+	b.size = 0
+	b.capacity = 0
+}
+
+// Skip moves the read pointer forward n bytes without copying.
+func (b *cirbuf) Scip(n uint32) error {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	if n > b.size {
+		return errors.New("not enough data to skip")
+	}
+
+	b.readPtr = (b.readPtr + n) % b.capacity
+	b.size -= n
+	return nil
+}
